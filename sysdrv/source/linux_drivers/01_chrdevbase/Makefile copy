@@ -1,0 +1,13 @@
+KERNELDIR := /home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/kernel
+CURRENT_PATH := $(shell pwd)
+obj-m := chrdevbase.o
+
+ARCH=arm
+CROSS_COMPILE=arm-rockchip830-linux-uclibcgnueabihf-
+
+build: kernel_modules
+
+kernel_modules:
+	$(MAKE) -C $(KERNELDIR) M=$(CURRENT_PATH) modules
+clean:
+	$(MAKE) -C $(KERNELDIR) M=$(CURRENT_PATH) clean

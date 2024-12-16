@@ -1,0 +1,1 @@
+cmd_/home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/linux_drivers/Load.ko-driver/Load.ko-driver/helloworld.mod := { echo  /home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/linux_drivers/Load.ko-driver/Load.ko-driver/helloworld.o;  echo; } > /home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/linux_drivers/Load.ko-driver/Load.ko-driver/helloworld.mod
