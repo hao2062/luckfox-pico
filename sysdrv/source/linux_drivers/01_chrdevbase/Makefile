@@ -13,6 +13,8 @@
 # 编译后内核路径
 KERNEL_DIR = /home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/kernel
 
+# test git edit function 
+
 # 定义框架
 # ARCH 为 x86 时，编译链头为 
 # ARCH 为 arm 时，编译链头为 arm-linux-gnueabihf-
