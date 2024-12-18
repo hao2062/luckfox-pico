@@ -1,9 +1,3 @@
-#include <linux/types.h>
-#include <linux/kernel.h>
-#include <linux/delay.h>
-#include <linux/ide.h>
-#include <linux/init.h>
-#include <linux/module.h>
 /***************************************************************
 Copyright © ALIENTEK Co., Ltd. 1998-2029. All rights reserved.
 文件名		: chrdevbase.c
@@ -14,6 +8,12 @@ Copyright © ALIENTEK Co., Ltd. 1998-2029. All rights reserved.
 论坛 	   	: www.openedv.com
 日志	   	: 初版V1.0 2022/12/01 正点原子创建
 ***************************************************************/
+#include <linux/types.h>
+#include <linux/kernel.h>
+#include <linux/delay.h>
+#include <linux/ide.h>
+#include <linux/init.h>
+#include <linux/module.h>
 
 #define CHRDEVBASE_MAJOR	200				/* 主设备号 */
 #define CHRDEVBASE_NAME		"chrdevbase" 	/* 设备名     */
