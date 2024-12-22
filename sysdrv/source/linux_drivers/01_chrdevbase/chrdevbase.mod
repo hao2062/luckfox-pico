@@ -1,2 +1,2 @@
-/home/zuozhongkai/linux/atk-mp1/Drivers/Linux_Drivers/1_chrdevbase/chrdevbase.o
+/home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/linux_drivers/01_chrdevbase/chrdevbase.o
 

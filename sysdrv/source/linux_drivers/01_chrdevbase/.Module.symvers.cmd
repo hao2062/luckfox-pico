@@ -1,0 +1,1 @@
+cmd_/home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/linux_drivers/01_chrdevbase/Module.symvers := sed 's/\.ko$$/\.o/' /home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/linux_drivers/01_chrdevbase/modules.order | scripts/mod/modpost     -o /home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/linux_drivers/01_chrdevbase/Module.symvers -e -i Module.symvers   -T -

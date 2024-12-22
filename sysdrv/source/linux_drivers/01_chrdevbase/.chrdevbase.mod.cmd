@@ -1,0 +1,1 @@
+cmd_/home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/linux_drivers/01_chrdevbase/chrdevbase.mod := { echo  /home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/linux_drivers/01_chrdevbase/chrdevbase.o;  echo; } > /home/hao/dev/sdk/rv1103/luckfox-pico/sysdrv/source/linux_drivers/01_chrdevbase/chrdevbase.mod

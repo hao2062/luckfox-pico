@@ -20,7 +20,7 @@ Copyright © ALIENTEK Co., Ltd. 1998-2029. All rights reserved.
 
 static char readbuf[100];		/* 读缓冲区 */
 static char writebuf[100];		/* 写缓冲区 */
-static char kerneldata[] = {"kernel data!"};
+static char kerneldata[] = {"kernel data!"};	// 内核数据
 
 /*
  * @description		: 打开设备
@@ -48,8 +48,8 @@ static ssize_t chrdevbase_read(struct file *filp, char __user *buf, size_t cnt, 
 	int retvalue = 0;
 	
 	/* 向用户空间发送数据 */
-	memcpy(readbuf, kerneldata, sizeof(kerneldata));
-	retvalue = copy_to_user(buf, readbuf, cnt);
+	memcpy(readbuf, kerneldata, sizeof(kerneldata));	// 拷贝内核数据到读缓冲区
+	retvalue = copy_to_user(buf, readbuf, cnt);		// 把数据从内核空间拷贝到用户空间 readbuf -> buf
 	if(retvalue == 0){
 		printk("kernel senddata ok!\r\n");
 	}else{
@@ -72,7 +72,7 @@ static ssize_t chrdevbase_write(struct file *filp, const char __user *buf, size_
 {
 	int retvalue = 0;
 	/* 接收用户空间传递给内核的数据并且打印出来 */
-	retvalue = copy_from_user(writebuf, buf, cnt);
+	retvalue = copy_from_user(writebuf, buf, cnt);	// 将用户空间 buf 数据拷贝到内核空间 writebuf
 	if(retvalue == 0){
 		printk("kernel recevdata:%s\r\n", writebuf);
 	}else{
@@ -115,6 +115,7 @@ static int __init chrdevbase_init(void)
 	int retvalue = 0;
 
 	/* 注册字符设备驱动 */
+	// 通过 主设备号 + 设备名（字符） + 操作函数（fops）注册
 	retvalue = register_chrdev(CHRDEVBASE_MAJOR, CHRDEVBASE_NAME, &chrdevbase_fops);
 	if(retvalue < 0){
 		printk("chrdevbase driver register failed\r\n");
@@ -131,6 +132,7 @@ static int __init chrdevbase_init(void)
 static void __exit chrdevbase_exit(void)
 {
 	/* 注销字符设备驱动 */
+	// 通过 主设备号 + 设备名（字符） 卸载
 	unregister_chrdev(CHRDEVBASE_MAJOR, CHRDEVBASE_NAME);
 	printk("chrdevbase exit!\r\n");
 }
