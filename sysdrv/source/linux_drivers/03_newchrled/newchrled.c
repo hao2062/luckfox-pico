@@ -3,7 +3,8 @@ Copyright © ALIENTEK Co., Ltd. 1998-2029. All rights reserved.
 文件名		: newchrled.c
 作者	  	: 正点原子
 版本	   	: V1.0
-描述	   	: LED驱动文件。
+描述	   	: LED 驱动文件。
+			：这部分程序，只在 init 过程中的注册字符设备部分有修改
 其他	   	: 无
 论坛 	   	: www.openedv.com
 日志	   	: 初版V1.0 2022/12/02 正点原子团队创建
@@ -14,19 +15,20 @@ Copyright © ALIENTEK Co., Ltd. 1998-2029. All rights reserved.
 #include <linux/ide.h>
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/errno.h>
-#include <linux/gpio.h>
-#include <linux/cdev.h>
+#include <linux/errno.h>	// 错误码
+#include <linux/gpio.h>	
+#include <linux/cdev.h>		// 字符设备
 #include <linux/device.h>
-#include <asm/mach/map.h>
-#include <asm/uaccess.h>
-#include <asm/io.h>
+#include <asm/mach/map.h>	
+#include <asm/uaccess.h>	// 用户空间和内核空间的 访问函数
+#include <asm/io.h>			// I/O 操作函数
 
 #define NEWCHRLED_CNT			1		  	/* 设备号个数 */
 #define NEWCHRLED_NAME			"newchrled"	/* 名字 */
 #define LEDOFF 					0			/* 关灯 */
 #define LEDON 					1			/* 开灯 */
 
+// GPIO3D 相关的 物理寄存器地址
 #define GRF_BASE						(0XFE000000)
 #define GRF_GPIO3D_IOMUX_H				(GRF_BASE + 0X1006C)
 #define GRF_GPIO3D_DS_H					(GRF_BASE + 0X100EC)
@@ -41,16 +43,17 @@ static void __iomem *GRF_GPIO3D_DS_H_PI;
 static void __iomem *GPIO3_SWPORT_DR_H_PI;
 static void __iomem *GPIO3_SWPORT_DDR_H_PI;
 
-/* newchrled设备结构体 */
+/* newchrled 设备结构体 */	// 定义了和 LED 相关的字段
 struct newchrled_dev{
-	dev_t devid;			/* 设备号 	 */
-	struct cdev cdev;		/* cdev 	*/
-	struct class *class;	/* 类 		*/
-	struct device *device;	/* 设备 	 */
+	dev_t devid;			// 设备号
+	struct cdev cdev;		// 存放字符设备
+	struct class *class;	// 设备类
+	struct device *device;	// 用于创建设备文件
 	int major;				/* 主设备号	  */
 	int minor;				/* 次设备号   */
 };
 
+// 实例化一个设备结构体
 struct newchrled_dev newchrled;	/* led设备 */
 
 /*
@@ -177,7 +180,7 @@ static struct file_operations newchrled_fops = {
 };
 
 /*
- * @description	: 驱动出口函数
+ * @description	: 驱动入口函数
  * @param 		: 无
  * @return 		: 无
  */
@@ -221,39 +224,46 @@ static int __init led_init(void)
 	/* 注册字符设备驱动 */
 	/* 1、创建设备号 */
 	if (newchrled.major) {		/*  定义了设备号 */
-		newchrled.devid = MKDEV(newchrled.major, 0);
-		ret = register_chrdev_region(newchrled.devid, NEWCHRLED_CNT, NEWCHRLED_NAME);
+		newchrled.devid = MKDEV(newchrled.major, 0);	// 通过 MKDEV 将 major 和 0 组成设备号
+		// 注册设备号：newchrled.devid-设备号，NEWCHRLED_CNT-设备数量，NEWCHRLED_NAME-设备名
+		ret = register_chrdev_region(newchrled.devid, NEWCHRLED_CNT, NEWCHRLED_NAME);	
 		if(ret < 0) {
 			pr_err("cannot register %s char driver [ret=%d]\n",NEWCHRLED_NAME, NEWCHRLED_CNT);
 			goto fail_map;
 		}
 	} else {						/* 没有定义设备号 */
+		// 动态分配一个设备号（系统自己随机一个出来）：newchrled.devid-分配的设备号，0-次设备号，NEWCHRLED_CNT-设备数量，NEWCHRLED_NAME-设备名称
 		ret = alloc_chrdev_region(&newchrled.devid, 0, NEWCHRLED_CNT, NEWCHRLED_NAME);	/* 申请设备号 */
 		if(ret < 0) {
 			pr_err("%s Couldn't alloc_chrdev_region, ret=%d\r\n", NEWCHRLED_NAME, ret);
 			goto fail_map;
 		}
+		// 从 devid 中解析出主次设备号
 		newchrled.major = MAJOR(newchrled.devid);	/* 获取分配号的主设备号 */
 		newchrled.minor = MINOR(newchrled.devid);	/* 获取分配号的次设备号 */
 	}
 	printk("newcheled major=%d,minor=%d\r\n",newchrled.major, newchrled.minor);	
 	
 	/* 2、初始化cdev */
+	// 将文件操作结构体和字符设备关联：newchrled.cdev-字符设备对象，newchrled_fops-文件操作结构体
 	newchrled.cdev.owner = THIS_MODULE;
-	cdev_init(&newchrled.cdev, &newchrled_fops);
+	cdev_init(&newchrled.cdev, &newchrled_fops);	// 添加 fops 设备文件操作函数
 	
 	/* 3、添加一个cdev */
-	ret = cdev_add(&newchrled.cdev, newchrled.devid, NEWCHRLED_CNT);
+	// 将字符设备注册到内核：newchrled_led.cdev-字符设备对象，newchrled.devid-字符设备号，NEWCHRLED_CNT-设备数量
+	ret = cdev_add(&newchrled.cdev, newchrled.devid, NEWCHRLED_CNT);	// 向 linux 系统中添加字符设备
 	if(ret < 0)
 		goto del_unregister;
 		
 	/* 4、创建类 */
+	// 创建新的设备类：THIS_MODULE-当前模块，NEWCHRLED_NAME-设备类名称
 	newchrled.class = class_create(THIS_MODULE, NEWCHRLED_NAME);
 	if (IS_ERR(newchrled.class)) {
 		goto del_cdev;
 	}
 
 	/* 5、创建设备 */
+	// 创建设备文件（/dev/NEWCHRLED_NAME）：newchrled.class-设备类，NULL-父设备，newchrled.devid-设备号，NULL-设备属性，NEWCHRLED_NAME-设备名称
 	newchrled.device = device_create(newchrled.class, NULL, newchrled.devid, NULL, NEWCHRLED_NAME);
 	if (IS_ERR(newchrled.device)) {
 		goto destroy_class;
@@ -295,3 +305,14 @@ module_exit(led_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("ALIENTEK");
 MODULE_INFO(intree, "Y");
+
+/* 前面的字符设备注册程序，是通过 register_chrdev 注册的（设备号 + 设备名 + 操作函数）。
+   这种注册方式有两个问题：
+   1.需要提前确定主设备号
+   2.注册完后会用掉所以次设备号
+*/ 
+
+/* 因此，新版内核使用 register_chrdev_region 注册字符设备（设备号 + 申请数量，一般是 1 + 设备名）
+1. 创建设备号（devid）-> 2. 初始化字符设备（cdev）-> 3. 添加字符设备（cdev）到内核 
+   -> 4. 创建设备类（class）-> 5. 创建设备文件（device）
+*/
